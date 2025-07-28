@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador de Horários - UNICSUM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a3a5f;
+            --secondary: #2c5c8a;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --success: #28a745;
+            --info: #17a2b8;
+            --purple: #6f42c1;
+            --orange: #fd7e14;
+            --red: #e74c3c;
+            --white: #ffffff;
+            --gray: #6c757d;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--white);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--white);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+        
+        h1 {
+            font-size: 2.3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .schedule-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            flex: 2;
+            min-width: 600px;
+            overflow-x: auto;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: var(--light);
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44, 92, 138, 0.2);
+        }
+        
+        .btn {
+            background: var(--secondary);
+            color: var(--white);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-export {
+            background: var(--red);
+            margin-top: auto;
+        }
+        
+        .btn-export:hover {
+            background: #c0392b;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            table-layout: fixed;
+        }
+        
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 15px 8px; /* Aumentado padding vertical */
+            text-align: center;
+            min-width: 120px;
+            height: auto; /* Altura automática */
+            min-height: 70px; /* Altura mínima */
+            vertical-align: middle;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+            padding: 15px;
+            font-size: 1rem;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: var(--light);
+        }
+        
+        .time-cell {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+            padding: 12px 15px;
+            width: 120px;
+        }
+        
+        /* Cores por área da saúde */
+        .biomedicina { 
+            background-color: rgba(40, 167, 69, 0.1) !important; 
+            border-left: 4px solid var(--success); 
+        }
+        .farmacia { 
+            background-color: rgba(23, 162, 184, 0.1) !important; 
+            border-left: 4px solid var(--info); 
+        }
+        .enfermagem { 
+            background-color: rgba(111, 66, 193, 0.1) !important; 
+            border-left: 4px solid var(--purple); 
+        }
+        .fisioterapia { 
+            background-color: rgba(253, 126, 20, 0.1) !important; 
+            border-left: 4px solid var(--orange); 
+        }
+        
+        .instructions {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .instructions h3 i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            color: var(--white);
+            padding: 30px;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+        
+        .developer {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+            color: var(--white);
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+        }
+        
+        .social-btn i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: var(--light);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        
+        .cell-content {
+            padding: 5px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            word-wrap: break-word; /* Quebra de palavras longas */
+            white-space: normal; /* Permite múltiplas linhas */
+            line-height: 1.4;
+        }
+        
+        .cell-sub {
+            font-size: 0.8rem;
+            color: var(--gray);
+            font-weight: 500;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .form-section, .schedule-section {
+                min-width: 100%;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                padding-top: 40px;
+            }
+            
+            .logo {
+                position: static;
+                margin-bottom: 15px;
+                display: inline-block;
+            }
+            
+            table {
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 12px 5px; /* Ajuste para mobile */
+            }
+            
+            .time-cell {
+                font-size: 0.8rem;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">UNICSUM</div>
+            <h1>Organizador de Horários para Professores</h1>
+            <p class="subtitle">Sistema exclusivo da UNICSUM - Centro Universitário do Sudeste Mineiro</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-plus-circle"></i> Adicionar Disciplina</h2>
+                <div class="form-group">
+                    <label for="disciplina"><i class="fas fa-book"></i> Disciplina:</label>
+                    <input type="text" id="disciplina" placeholder="Ex: Farmacologia, Anatomia...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="turma"><i class="fas fa-users"></i> Turma:</label>
+                    <select id="turma">
+                        <option value="Biomedicina">Biomedicina</option>
+                        <option value="Farmácia">Farmácia</option>
+                        <option value="Enfermagem">Enfermagem</option>
+                        <option value="Fisioterapia">Fisioterapia</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dia"><i class="fas fa-calendar-day"></i> Dia da Semana:</label>
+                    <select id="dia">
+                        <option value="Segunda">Segunda-feira</option>
+                        <option value="Terça">Terça-feira</option>
+                        <option value="Quarta">Quarta-feira</option>
+                        <option value="Quinta">Quinta-feira</option>
+                        <option value="Sexta">Sexta-feira</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="horario"><i class="fas fa-clock"></i> Horário:</label>
+                    <select id="horario">
+                        <option value="8:25 - 09:40">8:25 - 09:40</option>
+                        <option value="10:00 - 11:15">10:00 - 11:15</option>
+                        <option value="11:15 - 12:30">11:15 - 12:30</option>
+                        <option value="17:55 - 19:10">17:55 - 19:10</option>
+                        <option value="19:10 - 20:25">19:10 - 20:25</option>
+                        <option value="20:45 - 22:00">20:45 - 22:00</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="adicionarHorario()">
+                    <i class="fas fa-plus"></i> Adicionar à Grade
+                </button>
+                <button class="btn btn-export" onclick="exportarPDF()">
+                    <i class="fas fa-file-pdf"></i> Exportar para PDF
+                </button>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(40, 167, 69, 0.1); border-left: 4px solid #28a745;"></div>
+                        <span>Biomedicina</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(23, 162, 184, 0.1); border-left: 4px solid #17a2b8;"></div>
+                        <span>Farmácia</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(111, 66, 193, 0.1); border-left: 4px solid #6f42c1;"></div>
+                        <span>Enfermagem</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: rgba(253, 126, 20, 0.1); border-left: 4px solid #fd7e14;"></div>
+                        <span>Fisioterapia</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="schedule-section" id="scheduleExport">
+                <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Grade de Horários</h2>
+                <table id="tabelaHorario">
+                    <thead>
+                        <tr>
+                            <th style="width: 14%;">Horário</th>
+                            <th>Segunda-feira</th>
+                            <th>Terça-feira</th>
+                            <th>Quarta-feira</th>
+                            <th>Quinta-feira</th>
+                            <th>Sexta-feira</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-cell">8:25 - 09:40</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">10:00 - 11:15</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">11:15 - 12:30</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">17:55 - 19:10</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">19:10 - 20:25</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">20:45 - 22:00</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Como usar o sistema:</h3>
+            <ol>
+                <li><strong>Preencha os dados</strong> da disciplina: nome, turma, dia da semana e horário</li>
+                <li>Clique em <strong>"Adicionar à Grade"</strong> para inserir a disciplina na tabela</li>
+                <li>Repita o processo para todas as disciplinas que deseja incluir</li>
+                <li>Para remover uma disciplina, clique duas vezes na célula correspondente</li>
+                <li>Quando sua grade estiver completa, clique em <strong>"Exportar para PDF"</strong></li>
+                <li>O documento PDF gerado terá qualidade profissional para impressão em folha A4</li>
+            </ol>
+        </div>
+        
+        <footer>
+            <div class="developer">Desenvolvido por Prof. Gabriel Costa de Carvalho</div>
+            <p>Docente da UNICSUM - Centro Universitário do Sudeste Mineiro</p>
+            <a href="https://instagram.com/gabrielonchain" target="_blank" class="social-btn">
+                <i class="fab fa-instagram"></i> @gabrielonchain
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        // Mapeamento de cores por turma
+        const coresTurma = {
+            "Biomedicina": "biomedicina",
+            "Farmácia": "farmacia",
+            "Enfermagem": "enfermagem",
+            "Fisioterapia": "fisioterapia"
+        };
+        
+        function adicionarHorario() {
+            const disciplina = document.getElementById("disciplina").value.trim();
+            const turma = document.getElementById("turma").value;
+            const dia = document.getElementById("dia").value;
+            const horario = document.getElementById("horario").value;
+            
+            if (!disciplina) {
+                alert("Por favor, insira o nome da disciplina!");
+                return;
+            }
+            
+            const tabela = document.getElementById("tabelaHorario").getElementsByTagName('tbody')[0];
+            const linhaIndex = {
+                "8:25 - 09:40": 0,
+                "10:00 - 11:15": 1,
+                "11:15 - 12:30": 2,
+                "17:55 - 19:10": 3,
+                "19:10 - 20:25": 4,
+                "20:45 - 22:00": 5
+            }[horario];
+            
+            const colunaIndex = {
+                "Segunda": 1,
+                "Terça": 2,
+                "Quarta": 3,
+                "Quinta": 4,
+                "Sexta": 5
+            }[dia];
+            
+            const celula = tabela.rows[linhaIndex].cells[colunaIndex];
+            
+            // Adiciona a disciplina e turma com formatação
+            celula.innerHTML = `
+                <div class="cell-content">${disciplina}</div>
+                <div class="cell-sub">${turma}</div>
+            `;
+            celula.className = coresTurma[turma]; // Aplica a classe de cor
+            celula.style.cursor = "pointer";
+            
+            // Adiciona evento de duplo clique para remover
+            celula.ondblclick = function() {
+                this.innerHTML = "";
+                this.className = "";
+                this.style.backgroundColor = "";
+            };
+            
+            // Limpa o formulário
+            document.getElementById("disciplina").value = "";
+        }
+        
+        function exportarPDF() {
+            // Criar um clone da div que será exportada
+            const element = document.getElementById("scheduleExport");
+            const originalDisplay = element.style.display;
+            
+            // Criar um container para o PDF com estilos otimizados
+            const container = document.createElement('div');
+            container.style.padding = '30px';
+            container.style.fontFamily = "'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            container.style.width = '794px'; // A4 width in pixels (210mm)
+            container.style.margin = '0 auto';
+            container.style.backgroundColor = 'white';
+            container.style.boxSizing = 'border-box';
+            
+            // Adicionar cabeçalho institucional
+            const header = document.createElement('div');
+            header.style.textAlign = 'center';
+            header.style.marginBottom = '25px';
+            header.style.paddingBottom = '15px';
+            header.style.borderBottom = '2px solid #2c5c8a';
+            
+            const logo = document.createElement('div');
+            logo.innerHTML = 'UNICSUM';
+            logo.style.fontWeight = 'bold';
+            logo.style.fontSize = '32px';
+            logo.style.color = '#1a3a5f';
+            logo.style.marginBottom = '5px';
+            logo.style.letterSpacing = '1.5px';
+            
+            const title = document.createElement('h1');
+            title.textContent = 'Grade de Horários - Cursos da Saúde';
+            title.style.fontSize = '24px';
+            title.style.color = '#2c3e50';
+            title.style.marginBottom = '5px';
+            title.style.fontWeight = '600';
+            
+            const subtitle = document.createElement('div');
+            subtitle.textContent = 'Centro Universitário do Sudeste Mineiro';
+            subtitle.style.fontSize = '18px';
+            subtitle.style.color = '#555';
+            subtitle.style.marginBottom = '15px';
+            
+            const date = document.createElement('div');
+            date.textContent = 'Documento gerado em: ' + new Date().toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+            date.style.fontSize = '16px';
+            date.style.color = '#666';
+            
+            header.appendChild(logo);
+            header.appendChild(title);
+            header.appendChild(subtitle);
+            header.appendChild(date);
+            
+            // Adicionar grade de horários
+            const scheduleClone = element.cloneNode(true);
+            scheduleClone.style.width = '100%';
+            scheduleClone.style.boxShadow = 'none';
+            scheduleClone.style.borderRadius = '0';
+            scheduleClone.style.padding = '0';
+            scheduleClone.style.margin = '0';
+            
+            // Aumentar o tamanho da fonte para impressão
+            const table = scheduleClone.querySelector('table');
+            table.style.fontSize = '14px';
+            table.style.marginTop = '0';
+            
+            // Ajustar altura das células
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => {
+                    cell.style.height = 'auto';
+                    cell.style.minHeight = '70px';
+                    cell.style.padding = '15px 8px';
+                });
+            });
+            
+            // Ajustar cabeçalhos da tabela
+            const thead = table.querySelector('thead');
+            const headerCells = thead.querySelectorAll('th');
+            headerCells.forEach(cell => {
+                cell.style.fontSize = '15px';
+                cell.style.padding = '12px';
+            });
+            
+            // Adicionar rodapé
+            const footer = document.createElement('div');
+            footer.style.marginTop = '30px';
+            footer.style.textAlign = 'center';
+            footer.style.fontSize = '14px';
+            footer.style.color = '#666';
+            footer.style.paddingTop = '15px';
+            footer.style.borderTop = '1px solid #ddd';
+            footer.innerHTML = 'Desenvolvido por Prof. Gabriel Costa de Carvalho | UNICSUM - Centro Universitário do Sudeste Mineiro';
+            
+            // Montar o container final
+            container.appendChild(header);
+            container.appendChild(scheduleClone);
+            container.appendChild(footer);
+            
+            // Adicionar ao documento temporariamente
+            document.body.appendChild(container);
+            
+            // Gerar PDF
+            html2canvas(container, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                windowWidth: container.scrollWidth,
+                windowHeight: container.scrollHeight
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jspdf.jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                const imgWidth = 190; // Largura máxima em mm (A4 portrait)
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                
+                // Posicionar no topo (15mm do topo)
+                pdf.addImage(imgData, 'PNG', 10, 15, imgWidth, imgHeight);
+                pdf.save('organizador_de_horarios_unicsum.pdf');
+                
+                // Remover o container temporário
+                document.body.removeChild(container);
+            });
+        }
+        
+        // Adicionar evento de tecla para adicionar com Enter
+        document.getElementById("disciplina").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                adicionarHorario();
+            }
+        });
+    </script>
+</body>
+</html>
